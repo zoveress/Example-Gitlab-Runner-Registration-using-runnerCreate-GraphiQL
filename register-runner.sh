@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+export PRIVATE_TOKEN="Replace with your Personal Access Tokens" #To obtain a Personal Access Tokens log in to gitlab.com navigate to your profile ( upper right corner ) -> Preferences -> Access Tokens.
+export PROJECT_ID="Replace with your Project ID" #To obtain your project id log in to gitlab.com navigate to your the project you would like to register the runner to, then go to Settings -> General and copy the numeric value from "Project ID".
+export TAGLIST="yourtag" # Add the tags for your runner here.
+export GITLAB_URL="https://gitlab.com" # Change this is to your own hosted gitlab URL if you use gitlab.com leave the value set.
+export TOKEN=$(curl "$GITLAB_URL/api/graphql" --header "Authorization: Bearer $PRIVATE_TOKEN" --header "Content-Type: application/json" --request POST --data-binary '{"query": "mutation { runnerCreate( input: {projectId: \"gid://gitlab/Project/'$PROJECT_ID'\", runnerType: PROJECT_TYPE, tagList: \"'$TAGLIST'\", runUntagged: true, locked: true} ) { errors runner { ephemeralAuthenticationToken } } }"}' |jq '.data.runnerCreate.runner.ephemeralAuthenticationToken' | tr -d '"')
+sudo gitlab-runner register --non-interactive --url $GITLAB_URL --token $TOKEN --executor shell
